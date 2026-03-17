@@ -31,3 +31,5 @@ zeotap-dev-datascience.FEL_eu_west3.event_store_30_days_real_partition
 ## Quick Start
 Run steps in order: data_prep → scoring → affinity
 Each folder has query.sql, validate_before.sql, validate_after.sql
+
+After Phase 2 `zeotap-dev-datascience.FEL_eu_west3.brand_affinity_simple_view`
