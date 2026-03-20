@@ -43,16 +43,19 @@ AND has_url_search = 0
 
 Nothing:
 = 6,247,504 users ✅
+NULL Events Only   = 5,581,475  Global ❌
+Cookie Sync Only   = 1,578,011  Global ❌
+Gift Card Users    = 1,754      Global ❌
 
-These numbers ARE clean:
-→ marke filter:    32,867
-→ URL brand:    1,262,249
-→ brand search:    19,806
-→ URL search:      22,729
-→ category URL:   388,651
-→ global fallback: 6,247,504
-─────────────────────────────
-Total:           7,973,806 ✅
+Signal          Engaged    Browser    Total
+────────────────────────────────────────────
+marke filter    32,315     547        32,867
+url brand      300,851   3,534       304,385
+brand search    59,369     368        59,737
+url search      92,523     572        93,095
+category URL   129,560   5,275       134,835
+nothing        150,531  37,121     6,247,504*
+                                  (incl all groups)
 
 Each user counted ONCE only
 Using priority order
