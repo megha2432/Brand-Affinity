@@ -1,0 +1,42 @@
+Phase 3 — Browser No Purchase Deep Dive
+
+### Finding
+```
+BROWSER GROUP = 49,106
+─────────────────────────────────────────
+Browser - Truly Nothing      = 42,227
+→ App tracking gap
+→ Empty event payload
+→ Global fallback ❌
+
+Recovered - No Gift Card     = 5,190
+→ URL/marke/search signal
+→ Clean recovery ✅
+
+Recovered - Also Gift Card   = 507
+→ URL/marke/search signal
+→ Also had gift card events
+→ Still valid recovery ✅
+
+Gift Card Only - No Signal   = 1,182
+→ 884 purchased gift cards
+→ 298 viewed/carted gift cards
+→ No brand signal
+→ Global fallback ❌
+─────────────────────────────────────────
+Total browser recovery       = 5,697
+(5,190 + 507)
+```
+
+### Key Finding — Gift Cards
+```
+Confirmed gift card product_ids:
+bday_ph_25, basic_ro_25, bday_sg_25,
+heart4you_wr_25, vday_26,
+thankyoumuch_lp_25, None
+Implications:
+→ No real product buyers
+   hiding in blind group
+→ NULL brand on purchases
+   is expected behaviour
+→ Not a data quality issu
