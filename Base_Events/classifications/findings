@@ -1,0 +1,27 @@
+Phase 2 — Blind User Classification
+
+### Finding
+```
+NULL Events Only     = 5,581,475  (70.0%)
+→ zeotap technical records
+→ Not real shoppers
+
+Cookie Sync Only     = 1,578,011  (19.8%)
+→ zeotap cross device sync records
+→ Not real shoppers
+
+Engaged No Brand     = 765,149    (9.6%)
+→ Used filter/search/login/app
+→ Never reached product level
+→ Brand correctly NULL
+
+Browser No Purchase  = 49,106     (0.6%)
+→ Reached product level events
+→ Brand missing due to tracking gap
+→ Sub-groups below
+
+Gift Card Buyers     = 873        (0.01%)
+→ Only purchased gift cards
+→ No brand by design
+─────────────────────────────────────────
+Total                = 7,973,806  ✅
