@@ -62,9 +62,29 @@ Engaged No Brand (765,149):
 → Recoverable = 614,618 (80.3%)
 → Nothing     = 150,531 (19.7%)
 
-Browser No Purchase (47,417):
-→ Recoverable = 10,296  (21.7%)
-→ Nothing     = 37,121  (78.3%)
+From our verified overlap query:
+
+Recovered (have signals):
+marke primary    = 547
+url primary      = 3,534
+search primary   = 368
+url_search       = 572
+─────────────────────────
+Signal recovered = 5,021
+
+Category only    = 5,275
+                   (very weak)
+
+Gift card only   = 1,182
+                   (no signal)
+
+Nothing          = 37,121
+                   (app SDK gap)
+─────────────────────────────────
+Remaining groups:
+5,021 + 5,275 + 1,182 + 37,121
++ small overlaps
+= ~49,106 ✅
 
 NULL Events (5,581,475):
 → Almost all global fallback ❌
