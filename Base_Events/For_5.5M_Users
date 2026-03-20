@@ -1,0 +1,213 @@
+
+
+**Project:** Breuninger Brand Affinity Model
+**Type:** Data Science / Analysis
+**Priority:** HIGH
+**Status:** Preprocessing Complete — Training Table Pending
+**Assignee:** —
+**Date:** March 2026
+
+---
+
+## Overview
+
+Full preprocessing analysis completed on **5,543,584 users** with brand data (41% of 13.5M total users).
+Source table: `zeotap-dev-datascience.FEL_eu_west3.event_store_30_days_real_partition`
+Date range: Jan 24 – Feb 23 2026 · Total events: 372M rows · Total brands: 1,721
+
+---
+
+## Step 1 — Event Audit ✅
+
+**Goal:** Confirm which events carry brand signal.
+
+**Method:** Audited all event types by `brand_fill_pct` across 5.5M brand users.
+
+**Results:**
+
+| Event | Total Events | Unique Users | Brand Fill % |
+|---|---|---|---|
+| product_view | 74.2M | 5,517,645 | 100.00% |
+| view_cart | 46.8M | 954,977 | 96.91% |
+| add_to_cart | 4.1M | 851,282 | 99.94% |
+| add_to_wishlist | 3.1M | 371,438 | 99.99% |
+| purchase | 1.3M | 350,611 | 99.92% |
+
+Non-brand events (0% fill): `filter_usage`, `page_view`, `app_open`, `search_usage`, `successful_login`, `zeotap_cookie_sync`
+
+**Validation:** Exactly 5 product-level events confirmed with brand fill 96–100%. All other events excluded from affinity model.
+
+---
+
+## Step 2 — Bot Detection ✅
+
+**Goal:** Remove bot users from training data.
+
+**Method:** Identified users with abnormally high event velocity — confirmed bots by applying corrected threshold using only brand-signal events (not NULL/cookie_sync technical events).
+
+**Results:**
+
+| Metric | Count |
+|---|---|
+| Bots detected | 13,191 (0.24%) |
+| Clean users remaining | 5,530,393 |
+
+**Validation:** Bot count 13,191 is consistent with Phase 1 estimate of 12,761, confirming threshold correctness. Previous count of 43,770 was wrong — it incorrectly included NULL and `zeotap_cookie_sync` technical events.
+
+---
+
+## Step 3 — Brand Quality Check ✅
+
+**Goal:** Remove ghost brands and identify duplicates across 1,721 brands.
+
+**Method:** Classified all brands by unique user coverage. Normalised brand names (uppercase, strip punctuation) to detect duplicates.
+
+**Results:**
+
+| Brand Tier | Brands | Total Users |
+|---|---|---|
+| Mega Brand (>100k users) | 33 | 6,492,175 |
+| Large Brand (10k–100k) | 410 | 12,052,236 |
+| Medium Brand (1k–10k) | 737 | 3,018,482 |
+| Small Brand (100–1k) | 350 | 166,905 |
+| Micro Brand (10–100) | 96 | 4,775 |
+| Ghost Brand (<10 users) | 100 | 313 |
+
+**Decision:** Threshold set at ≥10 users. 100 ghost brands removed. 1,626 valid brands remain.
+
+**Validation:** Ghost brands (313 users total) represent <0.01% of user coverage — safe to remove with negligible model impact.
+
+---
+
+## Step 4a — Session Analysis ✅
+
+**Goal:** Measure intent dilution — how many brands does a user browse in a single session?
+
+**Method:** Grouped events by `session_id` + `ucid`, counted distinct `product_brand` per session.
+
+**Results:**
+
+| Brands in Session | Sessions | % of Total |
+|---|---|---|
+| 1 brand | 10,199,700 | 66.88% |
+| 2 brands | 2,025,713 | 13.28% |
+| 3–5 brands | 1,897,179 | 12.44% |
+| 6+ brands | ~1,130,000 | ~7.40% |
+| Max observed | 161 brands | — |
+
+**Decision:** Apply session dilution weight = `1 / brands_in_session` to each event. Sessions with >20 brands contribute <5% weight and are effectively neutralised.
+
+**Validation:** 80%+ of sessions have ≤5 brands — dilution is manageable, not a blocker.
+
+---
+
+## Step 4b — User Concentration Analysis ✅
+
+**Goal:** Measure per-user brand focus across full 30-day window to assign confidence tiers.
+
+**Method:** Calculated `top_brand_pct` = events on top brand / total events per user.
+
+**Results:**
+
+| Confidence Tier | Users | % Users | Avg Brands | Avg Top Brand % |
+|---|---|---|---|---|
+| Single brand | 3,479,921 | 62.89% | 1.0 | 100% |
+| Dominant (≥80%) | 186,488 | 3.37% | 2.5 | 86.4% |
+| Strong (50–79%) | 868,460 | 15.70% | 3.4 | 59.4% |
+| Moderate (25–49%) | 665,477 | 12.03% | 8.7 | 35.1% |
+| Spread (<25%) | 332,867 | 6.02% | 26.4 | 17.0% |
+
+**Decision:** 82% of users (Single + Dominant + Strong) have high/good confidence affinity labels. 6% spread users to be excluded from training, scored at inference only.
+
+**Validation:** Confidence score = `top_brand_pct / 100`. Training threshold: confidence ≥ 0.50.
+
+---
+
+## Step 4c — Brand Conversion Funnel ✅
+
+**Goal:** Understand how many users who viewed each brand actually purchased — to weight brand-level signal strength.
+
+**Method:** Built view → cart → purchase funnel per brand across full 30-day window. Classified brands into conversion buckets.
+
+**Results:**
+
+| Conversion Bucket | Brands | Avg Conversion % | Total Purchasers |
+|---|---|---|---|
+| Moderate (10–24%) | 37 | 12.23% | 236,951 |
+| Low (1–9%) | 1,353 | 3.27% | 784,658 |
+| Browse-only (<1%) | 237 | 0.48% | 7,064 |
+
+**Decision:** Apply conversion weight per brand:
+- Moderate brands (10–24%) → weight 1.5
+- Low brands (1–9%) → weight 1.0
+- Browse-only (<1%) → weight 0.6
+
+**Validation:** No brand exceeded 25% conversion — consistent with premium fashion retail behaviour. 237 browse-only brands (aspirational luxury) correctly penalised.
+
+---
+
+## Step 5 — Discount Analysis ✅
+
+**Goal:** Verify that 63.79% discount rate observed in Phase 1 is real and consistent.
+
+**Method:** Calculated `avg_discount_pct` and `pct_discounted` per event type across clean 5.5M users.
+
+**Results:**
+
+| Event | Events | Avg Discount % | % Discounted |
+|---|---|---|---|
+| product_view | 74,181,107 | 64.27% | 57.40% |
+| view_cart | 46,783,268 | 62.66% | 59.57% |
+| add_to_cart | 4,080,111 | 62.73% | 60.83% |
+| add_to_wishlist | 3,100,124 | 70.31% | 47.90% |
+| purchase | 1,257,208 | 60.24% | 65.27% |
+
+**Validation:** Discount rate is consistent across all 5 event types (57–65%). Purchase has highest discount rate (65.27%) — expected, as discounts drive conversions. add_to_wishlist lowest (47.90%) — aspirational behaviour is less discount-driven. Phase 1 figure of 63.79% confirmed valid.
+
+---
+
+## Combined Scoring Formula (for Step 6)
+
+Each user–brand pair is scored as:
+
+```
+brand_score = SUM(
+  event_weight × session_weight × conversion_weight
+)
+
+event_weight:
+  purchase        = 5.0
+  add_to_cart     = 3.0
+  add_to_wishlist = 2.0
+  view_cart       = 1.5
+  product_view    = 1.0
+
+session_weight    = 1 / brands_in_session
+
+conversion_weight:
+  moderate brand (10–24%) = 1.5
+  low brand      (1–9%)   = 1.0
+  browse-only    (<1%)    = 0.6
+```
+
+Top brand per user = brand with highest `brand_score` (RANK() = 1).
+Confidence tier attached per user from Step 4b.
+
+---
+
+## Next Step — Step 6: Build Training Table ⬜
+
+**Table:** `brand_step0_train_v3`
+
+**Output columns:**
+- `ucid` — user identifier
+- `top_brand` — highest scoring brand
+- `brand_score` — combined weighted score
+- `confidence_tier` — Single / Dominant / Strong / Moderate / Spread
+- `top_brand_pct` — % of user's events on top brand
+- `brand_conversion_bucket` — moderate / low / browse-only
+- `pct_discounted` — % of user's purchases that were discounted
+- `total_brand_events` — total events used to compute score
+
+**Training population:** 5,530,393 clean users · 1,626 valid brands
+**Excluded from training:** 332,867 spread users (confidence < 0.25) — scored at inference only.
