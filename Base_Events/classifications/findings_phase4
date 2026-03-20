@@ -79,3 +79,31 @@ Each user counted ONCE only
 Using priority order
 Verified by adding up to
 exact total ✅
+
+FINDING: Cookie Sync Brand URLs
+Are Technical Records
+
+95,778 cookie sync users have
+/marken/BRAND/ URLs in their data
+
+Investigation confirmed:
+→ has_user_agent = 0 (ALL)
+→ has_country    = 0 (ALL)
+→ These are NOT real browser visits
+→ zeotap cookie sync process
+  attaches brand URLs internally
+→ No real user intent
+
+Decision:
+→ Excluded from recovery ❌
+→ Global fallback
+→ Inflates url brand signal count
+   by ~957,864 users
+
+Impact on signal counts:
+→ url brand: 1,262,249 total
+  but only ~304,385 real users
+→ Remaining ~957,864 = technical
+→ Do not use 1,262,249 as
+  recovery target
+→ Use ~304,385 instead
