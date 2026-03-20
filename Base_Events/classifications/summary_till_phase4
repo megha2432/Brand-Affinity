@@ -1,0 +1,29 @@
+✅ page_intent + page_journey = 100% NULL
+   → Drop these columns forever
+
+✅ All blind purchases = gift cards
+   → 6 product_ids confirmed
+   → Not a bug, expected behaviour
+
+✅ Cookie sync brand URLs = technical
+   → No user_agent, no country
+   → Not real browser visits
+   → Do not recover
+
+✅ App SDK tracking gap confirmed
+   → 42,227 browser users
+   → Events fire but empty payload
+   → Breuninger SDK fix needed
+
+✅ marke filter = strongest blind signal
+   → Most deliberate user action
+   → Higher confidence than URL
+
+✅ URL search term = new discovery
+   → search_phrase NULL (SDK bug)
+   → Brand preserved in ?q= parameter
+   → Additional 22,729 users
+
+✅ 3.9 day consideration window
+   → Search to purchase average
+   → Input for time decay lambda
