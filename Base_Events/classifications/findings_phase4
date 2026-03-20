@@ -1,0 +1,60 @@
+PRIORITY: marke > url > search > url_search > category
+
+Users assigned to BEST signal only:
+
+marke as primary signal:
+Rows where has_marke = 1
+= 32,867 users ✅
+
+url as primary signal
+(no marke):
+Rows where has_url = 1
+AND has_marke = 0
+= 1,187,498 + 31,154 + 23,523
++ 11,484 + 5,216 + 1,891
++ 1,284 + 199
+= 1,262,249 users ✅
+
+brand search as primary
+(no url, no marke):
+Rows where has_search = 1
+AND has_url = 0
+AND has_marke = 0
+= 15,645 + 3,989 + 106 + 66
+= 19,806 users ✅
+
+url_search as primary
+(no url, no marke, no search):
+Rows where has_url_search = 1
+AND has_url = 0
+AND has_marke = 0
+AND has_search = 0
+= 21,824 + 905
+= 22,729 users ✅
+
+category as primary
+(no other signals):
+Rows where has_category = 1
+AND has_url = 0
+AND has_marke = 0
+AND has_search = 0
+AND has_url_search = 0
+= 388,651 users ✅
+
+Nothing:
+= 6,247,504 users ✅
+
+These numbers ARE clean:
+→ marke filter:    32,867
+→ URL brand:    1,262,249
+→ brand search:    19,806
+→ URL search:      22,729
+→ category URL:   388,651
+→ global fallback: 6,247,504
+─────────────────────────────
+Total:           7,973,806 ✅
+
+Each user counted ONCE only
+Using priority order
+Verified by adding up to
+exact total ✅
